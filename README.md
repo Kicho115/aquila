@@ -1,6 +1,7 @@
 # aquila
 
 Project for my image processing class
+You will need two terminals: one for the backend and one for the frontend.
 
 # frontend
 
@@ -17,10 +18,13 @@ https://fastapi.tiangolo.com/virtual-environments/
 ```
 cd backend
 
-// crear venv
+// Create venv
 python -m venv .venv
 source .venv/bin/activate
 
-// Instalar dependencias
+// Install dependencies
 pip install -r requirements.txt
+
+// Run the server
+fastapi run main.py
 ```
