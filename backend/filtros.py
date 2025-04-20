@@ -162,24 +162,24 @@ def adaptive_filter(image, condition):
     else:
         return image  # Sin cambios si no se especifica condición
 
-def main():
-    # Cargar la imagen
-    image_path = "Imagenes_Pruebas/nieve3.jpg"  # Cambia esto por la ruta de tu imagen
-    image = cv2.imread(image_path)
+# def main():
+#     # Cargar la imagen
+#     image_path = "Imagenes_Pruebas/nieve3.jpg"  # Cambia esto por la ruta de tu imagen
+#     image = cv2.imread(image_path)
 
-    # Especificar la condición atmosférica
-    condition = "nieve"  # Cambia a "lluvia" según la condición
+#     # Especificar la condición atmosférica
+#     condition = "nieve"  # Cambia a "lluvia" según la condición
 
-    # Aplicar el filtro adaptativo
-    filtered_image = adaptive_filter(image, condition)
+#     # Aplicar el filtro adaptativo
+#     filtered_image = adaptive_filter(image, condition)
 
-    # Mostrar la imagen original y la filtrada
-    cv2.imshow("Imagen Original", image)
-    cv2.imshow("Imagen Filtrada", filtered_image)
+#     # Mostrar la imagen original y la filtrada
+#     cv2.imshow("Imagen Original", image)
+#     cv2.imshow("Imagen Filtrada", filtered_image)
 
-    # Esperar a que se presione una tecla para cerrar
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+#     # Esperar a que se presione una tecla para cerrar
+#     cv2.waitKey(0)
+#     cv2.destroyAllWindows()
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
