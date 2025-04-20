@@ -88,7 +88,27 @@ def gamma_correction(image):
     :return: Imagen con corrección gamma aplicada.
     """
     # Calcular el inverso de gamma
-    gamma = 1
+    gamma = 0.7
+    inv_gamma = 1.0 / gamma
+
+    # Crear una tabla de búsqueda para mapear los valores de píxeles
+    table = np.array([(i / 255.0) ** inv_gamma * 255 for i in range(256)]).astype("uint8")
+
+    # Aplicar la corrección gamma usando la tabla de búsqueda
+    corrected_image = cv2.LUT(image, table)
+
+    return corrected_image
+
+def gamma_correction_sun(image): 
+    # Corrección gamma puede funcionar para noche o sol, sin embargo disminuye la calidad entre más intenso sea el filtro
+    """
+    Aplica corrección gamma a una imagen.
+    :param image: Imagen de entrada (en formato BGR).
+    :param gamma: Factor de corrección gamma (>1 reduce el brillo, <1 lo aumenta).
+    :return: Imagen con corrección gamma aplicada.
+    """
+    # Calcular el inverso de gamma
+    gamma = 0.45
     inv_gamma = 1.0 / gamma
 
     # Crear una tabla de búsqueda para mapear los valores de píxeles
@@ -156,30 +176,30 @@ def adaptive_filter(image, condition):
     elif condition == "lluvia":
         return reduce_rain_noise(image)
     elif condition == "sol":
-        return gamma_correction(image)
+        return gamma_correction_sun(image)
     elif condition == "nieve":
         return enhance_winter_image(image)
     else:
         return image  # Sin cambios si no se especifica condición
 
-# def main():
-#     # Cargar la imagen
+#def main():
+     # Cargar la imagen
 #     image_path = "Imagenes_Pruebas/nieve3.jpg"  # Cambia esto por la ruta de tu imagen
 #     image = cv2.imread(image_path)
 
-#     # Especificar la condición atmosférica
+     # Especificar la condición atmosférica
 #     condition = "nieve"  # Cambia a "lluvia" según la condición
 
-#     # Aplicar el filtro adaptativo
+     # Aplicar el filtro adaptativo
 #     filtered_image = adaptive_filter(image, condition)
 
-#     # Mostrar la imagen original y la filtrada
+     # Mostrar la imagen original y la filtrada
 #     cv2.imshow("Imagen Original", image)
 #     cv2.imshow("Imagen Filtrada", filtered_image)
 
-#     # Esperar a que se presione una tecla para cerrar
+     # Esperar a que se presione una tecla para cerrar
 #     cv2.waitKey(0)
-#     cv2.destroyAllWindows()
+#cv2.destroyAllWindows()
 
-# if __name__ == "__main__":
-#     main()
+#if __name__ == "__main__":
+#    main()
