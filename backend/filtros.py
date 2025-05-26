@@ -1,21 +1,7 @@
 import cv2
 import numpy as np
 
-'''def dehaze(image):
-    # Aplica CLAHE para mejorar el contraste en imágenes con neblina.
-
-    # Convertir la imagen de BGR a LAB
-    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-    l, a, b = cv2.split(lab)
-    # Crear y aplicar CLAHE
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    l_clahe = clahe.apply(l)
-    # Fusionar los canales y convertir de nuevo a BGR
-    lab_clahe = cv2.merge((l_clahe, a, b))
-    dehazed = cv2.cvtColor(lab_clahe, cv2.COLOR_LAB2BGR)
-    return dehazed'''
-
-def apply_high_pass_filter(image):
+def apply_high_pass_filter(image): # Utilizada en el filtro de lluvia.
     
     # Aplica un filtro de paso alto para resaltar bordes y detalles en la imagen.
     
@@ -57,8 +43,27 @@ def reduce_rain_noise(image):
     imagen_gamma = cv2.normalize(imagen_gamma, None, 0, 255, cv2.NORM_MINMAX, dtype = cv2.CV_8UC1)
     return imagen_gamma
 
+def reduced_rain_noise_s(image): # Utilizada en el filtro de lluvia.
+    # Reducir la resolución para mejorar el rendimiento
+    small_image = cv2.resize(image, (0, 0), fx=0.5, fy=0.5)
 
-def enhance_image(image):
+    # Reducir el ruido con parámetros ajustados
+    denoised_image = cv2.fastNlMeansDenoisingColored(small_image, None, h=3, templateWindowSize=3, searchWindowSize=15)
+
+    # Aplicar un filtro de paso alto (opcional, pero simplificado)
+    high_pass_image = apply_high_pass_filter(denoised_image)
+    high_pass_colored = cv2.cvtColor(high_pass_image, cv2.COLOR_GRAY2BGR)
+
+    # Combinar imágenes con pesos ajustados
+    combined_image = cv2.addWeighted(denoised_image, 0.8, high_pass_colored, 0.2, 0)
+
+    # Restaurar el tamaño original
+    restored_image = cv2.resize(combined_image, (image.shape[1], image.shape[0]))
+
+    return restored_image
+
+
+def enhance_image(image): # Utilizada para mejorar imágenes con neblina.
     
     # Mejora imágenes nocturnas a color utilizando CLAHE para ajustar el contraste.
     
@@ -79,7 +84,7 @@ def enhance_image(image):
 
     return enhanced_image
 
-def gamma_correction(image): 
+def gamma_correction(image): # Utilizada en el filtro de nieve.
     # Corrección gamma puede funcionar para noche o sol, sin embargo disminuye la calidad entre más intenso sea el filtro
     """
     Aplica corrección gamma a una imagen.
@@ -99,37 +104,8 @@ def gamma_correction(image):
 
     return corrected_image
 
+
 def gamma_correction_sun(image): 
-    # Corrección gamma puede funcionar para noche o sol, sin embargo disminuye la calidad entre más intenso sea el filtro
-    """
-    Aplica corrección gamma a una imagen.
-    :param image: Imagen de entrada (en formato BGR).
-    :param gamma: Factor de corrección gamma (>1 reduce el brillo, <1 lo aumenta).
-    :return: Imagen con corrección gamma aplicada.
-    """
-    # Calcular el inverso de gamma
-    gamma = 0.45
-    inv_gamma = 1.0 / gamma
-
-    # Crear una tabla de búsqueda para mapear los valores de píxeles
-    table = np.array([(i / 255.0) ** inv_gamma * 255 for i in range(256)]).astype("uint8")
-
-    # Aplicar la corrección gamma usando la tabla de búsqueda
-    corrected_image = cv2.LUT(image, table)
-
-    return corrected_image
-
-def reduce_noise(image):
-    
-    # Aplica un filtro bilateral para reducir el ruido mientras se preservan los bordes.
-    
-    # Filtro bilateral para reducir ruido
-    noise_reduced_image = cv2.bilateralFilter(image, d=3, sigmaColor=100, sigmaSpace=75)
-    return noise_reduced_image
-
-
-"""def flash_faturation(image):
-    
     # Aplica CLAHE a una imagen a color para mejorar el contraste y reducir el impacto de la luz excesiva.
     
     # Convertir la imagen de BGR a LAB
@@ -150,7 +126,17 @@ def reduce_noise(image):
     # Convertir de nuevo a BGR
     enhanced_image = cv2.cvtColor(lab_clahe, cv2.COLOR_LAB2BGR)
 
-    return enhanced_image"""
+    return enhanced_image
+
+
+def reduce_noise(image):
+    
+    # Aplica un filtro bilateral para reducir el ruido mientras se preservan los bordes.
+    
+    # Filtro bilateral para reducir ruido
+    noise_reduced_image = cv2.bilateralFilter(image, d=3, sigmaColor=100, sigmaSpace=75)
+    return noise_reduced_image
+
 
 def enhance_winter_image(image):
    
@@ -167,6 +153,31 @@ def enhance_winter_image(image):
 
     return enhanced_image
 
+def reduced_rain_noise_BiHi(image):
+    # Aplicar CLAHE en el canal de luminancia
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    cl = clahe.apply(l)
+    lab_clahe = cv2.merge((cl, a, b))
+    image_clahe = cv2.cvtColor(lab_clahe, cv2.COLOR_LAB2BGR)
+
+    # Reducir resolución
+    small_image = cv2.resize(image_clahe, (0, 0), fx=0.5, fy=0.5)
+    denoised = cv2.bilateralFilter(small_image, d=4, sigmaColor=100, sigmaSpace=50)
+
+    # Aplicar filtro de paso alto
+    high_pass_image = apply_high_pass_filter(small_image)
+    high_pass_colored = cv2.cvtColor(high_pass_image, cv2.COLOR_GRAY2BGR)
+
+    # Combinar imágenes con pesos ajustados
+    combined_image = cv2.addWeighted(denoised, 0.9, high_pass_colored, 0.25, 0)
+
+    # Restaurar el tamaño original
+    restored_image = cv2.resize(combined_image, (image.shape[1], image.shape[0]))
+    return restored_image
+
+
 def adaptive_filter(image, condition):
    
     # Aplica un filtro adaptativo basado en la condición atmosférica.
@@ -174,7 +185,7 @@ def adaptive_filter(image, condition):
     if condition == "neblina" or condition == "noche":
         return enhance_image(image)
     elif condition == "lluvia":
-        return reduce_rain_noise(image)
+        return reduced_rain_noise_BiHi(image)
     elif condition == "sol":
         return gamma_correction_sun(image)
     elif condition == "nieve":
@@ -182,24 +193,25 @@ def adaptive_filter(image, condition):
     else:
         return image  # Sin cambios si no se especifica condición
 
-#def main():
-     # Cargar la imagen
-#     image_path = "Imagenes_Pruebas/nieve3.jpg"  # Cambia esto por la ruta de tu imagen
-#     image = cv2.imread(image_path)
 
-     # Especificar la condición atmosférica
-#     condition = "nieve"  # Cambia a "lluvia" según la condición
+def main():
+    # Cargar la imagen
+    image_path = "Imagenes_Pruebas/lluvia2.jpg"  # Cambia esto por la ruta de tu imagen
+    image = cv2.imread(image_path)
 
-     # Aplicar el filtro adaptativo
-#     filtered_image = adaptive_filter(image, condition)
+    # Especificar la condición atmosférica
+    condition = "lluvia"  # Cambia a "lluvia" según la condición
 
-     # Mostrar la imagen original y la filtrada
-#     cv2.imshow("Imagen Original", image)
-#     cv2.imshow("Imagen Filtrada", filtered_image)
+    # Aplicar el filtro adaptativo
+    filtered_image = adaptive_filter(image, condition)
 
-     # Esperar a que se presione una tecla para cerrar
-#     cv2.waitKey(0)
-#cv2.destroyAllWindows()
+    # Mostrar la imagen original y la filtrada
+    cv2.imshow("Imagen Original", image)
+    cv2.imshow("Imagen Filtrada", filtered_image)
 
-#if __name__ == "__main__":
-#    main()
+    # Esperar a que se presione una tecla para cerrar
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()
