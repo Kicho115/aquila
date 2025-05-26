@@ -153,6 +153,30 @@ def enhance_winter_image(image):
 
     return enhanced_image
 
+def reduced_rain_noise_BiHi(image):
+    # Aplicar CLAHE en el canal de luminancia
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    cl = clahe.apply(l)
+    lab_clahe = cv2.merge((cl, a, b))
+    image_clahe = cv2.cvtColor(lab_clahe, cv2.COLOR_LAB2BGR)
+
+    # Reducir resolución
+    small_image = cv2.resize(image_clahe, (0, 0), fx=0.5, fy=0.5)
+    denoised = cv2.bilateralFilter(small_image, d=4, sigmaColor=100, sigmaSpace=50)
+
+    # Aplicar filtro de paso alto
+    high_pass_image = apply_high_pass_filter(small_image)
+    high_pass_colored = cv2.cvtColor(high_pass_image, cv2.COLOR_GRAY2BGR)
+
+    # Combinar imágenes con pesos ajustados
+    combined_image = cv2.addWeighted(denoised, 0.9, high_pass_colored, 0.25, 0)
+
+    # Restaurar el tamaño original
+    restored_image = cv2.resize(combined_image, (image.shape[1], image.shape[0]))
+    return restored_image
+
 
 def adaptive_filter(image, condition):
    
@@ -161,7 +185,7 @@ def adaptive_filter(image, condition):
     if condition == "neblina" or condition == "noche":
         return enhance_image(image)
     elif condition == "lluvia":
-        return reduced_rain_noise_s(image)
+        return reduced_rain_noise_BiHi(image)
     elif condition == "sol":
         return gamma_correction_sun(image)
     elif condition == "nieve":
@@ -172,7 +196,7 @@ def adaptive_filter(image, condition):
 
 def main():
     # Cargar la imagen
-    image_path = "Imagenes_Pruebas/lluvia.jpeg"  # Cambia esto por la ruta de tu imagen
+    image_path = "Imagenes_Pruebas/lluvia2.jpg"  # Cambia esto por la ruta de tu imagen
     image = cv2.imread(image_path)
 
     # Especificar la condición atmosférica
