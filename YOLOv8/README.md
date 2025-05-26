@@ -63,7 +63,7 @@ Esto instalará PyTorch, pycocotools y otras librerías requeridas.
 Para convertir las anotaciones de COCO al formato YOLO:
 
 1. Instala las dependencias necesarias (ver sección anterior).
-2. Ejecuta los scripts de conversión **dentro de la carpeta `YOLOv8`**:
+2. Ejecuta los scripts de conversión **dentro de la carpeta `YOLOv8`** (En terminal utiliza: cd YOLOv8):
    ```sh
    python convtrain.py
    python convval.py
@@ -75,6 +75,18 @@ Esto generará los archivos de etiquetas en `YOLOv8/data/coco/labels/train2017` 
 
 Asegúrate de tener los datos y anotaciones convertidas. Luego, puedes entrenar tu modelo YOLOv8 usando la configuración de `coco.yaml`.  
 Ejecuta los comandos de entrenamiento **dentro de la carpeta `YOLOv8`** para evitar problemas de rutas.
+
+En Terminal ejecuta lo siguiente dentro de la carpeta del proyecto para dirigirte a la carpeta de YOLOv8.
+```sh
+cd YOLOv8
+```
+
+Ya que estes en la carpeta de YOLOv8 trata ejecutando de la siguiente forma en la Terminal:
+```sh
+python train_yolov8.py
+```
+
+Si no funciona, ejecuta dirigiendote al boton de ejecutar de arriba y seleciona: "Run Python File in Dedicated Terminal" (debes estar dentro de la carpeta de YOLOv8 para esto también).
 
 ## Notas
 
