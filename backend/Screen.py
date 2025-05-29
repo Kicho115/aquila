@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import pyautogui
 from filters import adaptive_filter
+from detection import detect_y_draw
 
 def process_screen():
     """
@@ -68,6 +69,9 @@ def process_screen():
 
         # Ajustar la intensidad del filtro (si es necesario)
         filtered_image = cv2.addWeighted(screen_image, 1 - intensity, filtered_image, intensity, 0)
+
+        # --- Detección de objetos ---
+        filtered_image = detect_y_draw(filtered_image)
 
         # Mostrar el nombre del filtro en la imagen filtrada
         filtro_nombre = condition.capitalize() if condition else "Sin filtro"

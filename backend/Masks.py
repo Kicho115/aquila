@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from filters import adaptive_filter
+from detection import detect_y_draw
 
 def nothing(x):
     pass
@@ -69,6 +70,10 @@ def acceder_camara_con_filtros():
             2,
             cv2.LINE_AA
         )
+
+        # --- Detección de objetos ---
+        frame = detect_y_draw(frame)
+
         cv2.imshow('Camara con Filtros', frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
